@@ -1,0 +1,129 @@
+---
+title: "Task 3"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(tidyverse)
+library(treemap)
+```
+
+```{r}
+mydata <- read.csv("./SampleSuperstore.csv")
+```
+
+# Page 1
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+salesum <- mydata %>% group_by(Category,Sub.Category) %>% summarise(sumsales=sum(Sales))
+salesum %>% treemap(index=c("Category","Sub.Category"), vSize="sumsales",type="index",palette="Set1", title="Sales made across different categories and sub-categories")
+```
+
+
+# Page 2
+
+
+Column {data-width=650, .tabset}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+#sales vs profit for each of 3 category
+##Furniture, Office Supplies, Technology
+cat_sp <- mydata %>% group_by(Category) %>% summarise(sum_s=sum(Sales), sum_p=sum(Profit)) %>% pivot_longer(cols=c(sum_s,sum_p))
+cat_sp %>% ggplot(aes(fill=factor(name,levels=c('sum_s','sum_p')), x=Category, y=value)) +
+  geom_col(position="dodge",width=0.8) +
+  theme_test() +
+  theme(legend.title=element_blank()) +
+  labs(title = "                  Category-wise Sales and Profit", x="Category", y="Sum")
+```
+
+### Chart B
+
+```{r}
+subcat_sp <- mydata %>% group_by(Sub.Category) %>% summarise(sum_s=sum(Sales), sum_p=sum(Profit)) %>% pivot_longer(cols=c(sum_s,sum_p))
+subcat_sp %>% ggplot(aes(fill=factor(name,levels=c('sum_s','sum_p')), x=Sub.Category, y=value)) +
+  geom_col(width=0.7) +
+  theme_test() +
+  theme(legend.title=element_blank()) +
+  labs(title = "                       Sub-Category-wise Sales and Profit", x="Sub-Category", y="Sum") +
+  coord_flip()
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart C
+
+```{r}
+fur_sp <- mydata %>% filter(Category=="Furniture") %>% group_by(Sub.Category) %>% summarise(sum_s=sum(Sales), sum_p=sum(Profit)) %>% pivot_longer(cols=c(sum_s,sum_p))
+fur_sp %>% ggplot(aes(fill=factor(name,levels=c('sum_s','sum_p')), x=Sub.Category, y=value)) +
+  geom_col(position="dodge",width=0.8) +
+  theme_test() +
+  theme(legend.title=element_blank()) +
+  labs(title = "                  Furniture Sub-categories Sales and Profit", x="Category", y="Sum")
+```
+
+### Chart D
+
+```{r}
+off_sp <- mydata %>% filter(Category=="Office Supplies") %>% group_by(Sub.Category) %>% summarise(sum_s=sum(Sales), sum_p=sum(Profit)) %>% pivot_longer(cols=c(sum_s,sum_p))
+off_sp %>% ggplot(aes(fill=factor(name,levels=c('sum_s','sum_p')), x=Sub.Category, y=value)) +
+  geom_col(position="dodge",width=0.85) +
+  theme_test() +
+  theme(legend.title=element_blank()) +
+  labs(title = "        Office Supplies Sub-categories Sales and Profit", x="Sub-Category", y="Sum")
+```
+
+### Chart E
+
+```{r}
+tech_sp <- mydata %>% filter(Category=="Technology") %>% group_by(Sub.Category) %>% summarise(sum_s=sum(Sales), sum_p=sum(Profit)) %>% pivot_longer(cols=c(sum_s,sum_p))
+tech_sp %>% ggplot(aes(fill=factor(name,levels=c('sum_s','sum_p')), x=Sub.Category, y=value)) +
+  geom_col(position="dodge",width=0.8) +
+  theme_test() +
+  theme(legend.title=element_blank()) +
+  labs(title = "          Technology Sub-categories Sales and Profit", x="Category", y="Sum")
+```
+
+# Page 3
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+sump_cat <- mydata %>% select(Region,Category,Profit) %>% group_by(Region,Category) %>% summarise(sum_p=sum(Profit))
+sump_cat %>% ggplot(aes(x=Region,y=sum_p,fill=factor(Category,levels=c('Furniture','Office Supplies', 'Technology')))) +
+  geom_col(position="dodge", width=0.8) +
+  theme_test() +
+  theme(legend.title = element_blank()) +
+  labs(y="Total Profit",title = "Profit made in different regions")
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+sums_cat <- mydata %>% select(Region,Category,Sales) %>% group_by(Region,Category) %>% summarise(sum_p=sum(Sales))
+sums_cat %>% ggplot(aes(x=Region,y=sum_p,fill=factor(Category,levels=c('Furniture','Office Supplies', 'Technology')))) +
+  geom_col(position="dodge", width=0.8) +
+  theme_test() +
+  theme(legend.title = element_blank()) +
+  labs(y="Total Sales",title = "Sales in different regions")
+```
+
